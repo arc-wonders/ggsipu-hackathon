@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Traffic Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="processedvideos.html">Processed Videos</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="login.html">Login</a>
+    </div>
+
+    <div class="container">
+        <h1>Traffic Analytics</h1>
+        <p>View detailed traffic statistics and trends.</p>
+        <div class="analytics-section">
+            <h3>Processed Videos</h3>
+            <ul id="video-list"></ul>
+        </div>
+
+        <div class="graph-section" style="display: none;">
+            <h3>Analytics for <span id="selected-video"></span></h3>
+            <canvas id="congestionChart"></canvas>
+            <canvas id="speedChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('analytics.json');
+                const data = await response.json();
+    
+                const analyticsContainer = document.querySelector('.analytics-section');
+                analyticsContainer.innerHTML = '<h3>Processed Videos</h3>';
+    
+                data.forEach((entry, index) => {
+                    const videoEntry = document.createElement('div');
+                    videoEntry.innerHTML = `
+                        <p><strong>${entry.video}</strong></p>
+                        <button onclick="showCharts(${index})">View Analytics</button>
+                        <div id="chart-${index}" style="display: none;">
+                            <canvas id="congestion-chart-${index}"></canvas>
+                            <canvas id="speed-chart-${index}"></canvas>
+                        </div>
+                    `;
+                    analyticsContainer.appendChild(videoEntry);
+                });
+            } catch (error) {
+                console.error("Error loading analytics:", error);
+            }
+        }
+    
+        function showCharts(index) {
+            document.getElementById(`chart-${index}`).style.display = "block";
+            // You need to use Chart.js here to plot graphs
+        }
+    
+        loadAnalytics();
+    </script>
+    
+</body>
+</html>
