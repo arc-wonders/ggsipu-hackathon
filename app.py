@@ -3,7 +3,7 @@ import json
 import time
 import cv2
 import numpy as np
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from ultralytics import YOLO
 from sort import Sort  
@@ -14,8 +14,13 @@ CORS(app)
 UPLOAD_FOLDER = 'uploads'
 PROCESSED_FOLDER = 'processed_videos'
 ANALYTICS_FILE = 'analytics.json'
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PROCESSED_FOLDER'] = PROCESSED_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB Limit (Adjust if needed)
 
 # Load YOLO Model
 model = YOLO("yolov8n.pt")
@@ -94,14 +99,15 @@ def process_video(input_path, output_path):
                     x1, y1, x2, y2 = map(int, box_coords)
                     detections.append([x1, y1, x2, y2, confidence])
         
-        detections = np.array(detections)
-        tracked_objects = tracker.update(detections)
+        if len(detections) > 0:  # Ensure detections exist
+            detections = np.array(detections)
+            tracked_objects = tracker.update(detections)
         
-        for obj in tracked_objects:
-            x1, y1, x2, y2, track_id = obj.astype(int)
-            num_vehicles += 1
-            speed = object_speeds.get(track_id, 30)  # Placeholder speed
-            total_speed += speed
+            for obj in tracked_objects:
+                x1, y1, x2, y2, track_id = obj.astype(int)
+                num_vehicles += 1
+                speed = object_speeds.get(track_id, 30)  # Placeholder speed
+                total_speed += speed
         
         avg_speed = total_speed / num_vehicles if num_vehicles > 0 else 0
         congestion_data.append({'time': time.time(), 'vehicles': num_vehicles})
@@ -113,6 +119,10 @@ def process_video(input_path, output_path):
     out.release()
     cv2.destroyAllWindows()
     return congestion_data, speed_data
+
+@app.route('/processed_videos/<filename>')
+def get_processed_video(filename):
+    return send_from_directory(app.config['PROCESSED_FOLDER'], filename)
 
 @app.route('/list_videos')
 def list_videos():
