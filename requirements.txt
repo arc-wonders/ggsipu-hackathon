@@ -7,7 +7,6 @@ scipy
 matplotlib
 pandas
 requests
-sort
 scipy
 lap
 scikit-learn
