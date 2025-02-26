@@ -7,6 +7,9 @@ scipy
 matplotlib
 pandas
 requests
+sort
+scipy
+lap
 scikit-learn
 scikit-image==0.17.2
 filterpy==1.4.5
