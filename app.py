@@ -6,7 +6,7 @@ import json
 import logging
 import subprocess
 from threading import Thread
-from flask import Flask, request, jsonify, Response, abort
+from flask import Flask, request, jsonify, Response, abort, send_from_directory
 from flask_cors import CORS
 from ultralytics import YOLO
 
@@ -215,12 +215,9 @@ def process_video(input_path, output_path):
 
         out.write(frame)
 
-        # ---------------------------------------
         # Collect data for analysis every second
-        # ---------------------------------------
         if fps > 0 and frame_count % int(fps) == 0:
             current_time_sec = frame_count / fps
-            # Store the time and vehicle_count
             analysis_data.append({
                 'time_sec': current_time_sec,
                 'vehicle_count': vehicle_count
@@ -247,6 +244,14 @@ def process_video_threaded(input_path, output_path):
 
     thread = Thread(target=worker)
     thread.start()
+
+@app.route('/')
+def serve_index():
+    """
+    Serve 'index.html' at the root URL.
+    Make sure you have a 'static' folder with 'index.html' inside it.
+    """
+    return send_from_directory('static', 'index.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -291,9 +296,6 @@ def list_videos():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# -----------------------------
-# Analysis data route
-# -----------------------------
 @app.route('/analysis_data', methods=['GET'])
 def analysis_data_route():
     """
