@@ -23,10 +23,15 @@
         </select>
         <br><br>
 
+        <!-- Video element -->
         <video id="processedVideo" width="640" controls style="display: none;">
             <source id="videoSource" src="" type="video/mp4">
             Your browser does not support the video tag.
         </video>
+
+        <!-- Play button for user-initiated playback -->
+        <br>
+        <button id="playButton" style="display: none;">Play Video</button>
     </div>
 
     <script>
@@ -34,18 +39,22 @@
             fetch('http://127.0.0.1:5000/list_videos')
                 .then(response => response.json())
                 .then(videos => {
-                    let selector = document.getElementById('videoSelector');
-                    let videoElement = document.getElementById('processedVideo');
-                    let sourceElement = document.getElementById('videoSource');
+                    const selector = document.getElementById('videoSelector');
+                    const videoElement = document.getElementById('processedVideo');
+                    const sourceElement = document.getElementById('videoSource');
+                    const playButton = document.getElementById('playButton');
 
-                    selector.innerHTML = ""; // Clear previous options
+                    // Clear previous options
+                    selector.innerHTML = "";
 
                     if (videos.length === 0) {
                         selector.innerHTML = "<option>No processed videos available</option>";
                         videoElement.style.display = "none";
+                        playButton.style.display = "none";
                         return;
                     }
 
+                    // Populate the dropdown with video filenames
                     videos.forEach(video => {
                         let option = document.createElement('option');
                         option.value = video;
@@ -53,23 +62,29 @@
                         selector.appendChild(option);
                     });
 
-                    // Function to update video source
+                    // Function to update the video source
                     function updateVideo() {
-                        let selectedVideo = selector.value;
+                        const selectedVideo = selector.value;
                         if (selectedVideo) {
                             sourceElement.src = `http://127.0.0.1:5000/processed_videos/${selectedVideo}`;
-                            videoElement.style.display = "block"; // Show video
+                            videoElement.style.display = "block";
+                            playButton.style.display = "inline-block";
                             videoElement.load();
-                            videoElement.play(); // Auto-play selected video
+                            // Removed auto-play here
                         }
                     }
 
-                    // Load first video by default
+                    // Load the first video by default
                     selector.value = videos[0];
                     updateVideo();
 
-                    // Add event listener (outside fetch)
+                    // Change event for the dropdown
                     selector.addEventListener('change', updateVideo);
+
+                    // User-initiated playback
+                    playButton.addEventListener('click', () => {
+                        videoElement.play();
+                    });
                 })
                 .catch(error => {
                     console.error('Error fetching processed videos:', error);
