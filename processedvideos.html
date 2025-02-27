@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload & Processed Videos - Traffic Management</title>
+    <title>Processed Videos - Traffic Management</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,68 +16,67 @@
     </div>
     
     <div class="container">
-        <h1>Upload Video for Processing</h1>
-        <p>Select a video file to upload for traffic analysis.</p>
-        <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" id="videoFile" name="video" accept="video/*">
-            <button type="button" onclick="uploadVideo()">Upload</button>
-        </form>
-        <div id="uploadStatus"></div>
-    </div>
-    
-    <div class="container">
         <h1>Processed Videos</h1>
-        <div id="videos"></div>
+        <label for="videoSelector">Select a Processed Video:</label>
+        <select id="videoSelector">
+            <option>Loading videos...</option>
+        </select>
+        <br><br>
+
+        <video id="processedVideo" width="640" controls style="display: none;">
+            <source id="videoSource" src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
     </div>
 
     <script>
-        function uploadVideo() {
-            let fileInput = document.getElementById('videoFile');
-            let statusDiv = document.getElementById('uploadStatus');
-            
-            if (fileInput.files.length === 0) {
-                statusDiv.innerHTML = "<p style='color: red;'>Please select a file to upload.</p>";
-                return;
-            }
-
-            let formData = new FormData();
-            formData.append('video', fileInput.files[0]);
-            
-            statusDiv.innerHTML = "<p style='color: green;'>Uploading...</p>";
-
-            fetch('/upload', { method: 'POST', body: formData })
+        function loadProcessedVideos() {
+            fetch('http://127.0.0.1:5000/list_videos')
                 .then(response => response.json())
-                .then(data => {
-                    statusDiv.innerHTML = `<p style='color: green;'>${data.message}</p>`;
-                    loadProcessedVideos(); // Refresh processed videos after upload
+                .then(videos => {
+                    let selector = document.getElementById('videoSelector');
+                    let videoElement = document.getElementById('processedVideo');
+                    let sourceElement = document.getElementById('videoSource');
+
+                    selector.innerHTML = ""; // Clear previous options
+
+                    if (videos.length === 0) {
+                        selector.innerHTML = "<option>No processed videos available</option>";
+                        videoElement.style.display = "none";
+                        return;
+                    }
+
+                    videos.forEach(video => {
+                        let option = document.createElement('option');
+                        option.value = video;
+                        option.textContent = video;
+                        selector.appendChild(option);
+                    });
+
+                    // Function to update video source
+                    function updateVideo() {
+                        let selectedVideo = selector.value;
+                        if (selectedVideo) {
+                            sourceElement.src = `http://127.0.0.1:5000/processed_videos/${selectedVideo}`;
+                            videoElement.style.display = "block"; // Show video
+                            videoElement.load();
+                            videoElement.play(); // Auto-play selected video
+                        }
+                    }
+
+                    // Load first video by default
+                    selector.value = videos[0];
+                    updateVideo();
+
+                    // Add event listener (outside fetch)
+                    selector.addEventListener('change', updateVideo);
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    statusDiv.innerHTML = "<p style='color: red;'>Upload failed. Try again.</p>";
+                    console.error('Error fetching processed videos:', error);
+                    document.getElementById('videoSelector').innerHTML = "<option>Failed to load videos</option>";
                 });
         }
 
-        function loadProcessedVideos() {
-            fetch('/list_videos')
-                .then(response => response.json())
-                .then(videos => {
-                    let videoContainer = document.getElementById('videos');
-                    videoContainer.innerHTML = ""; // Clear previous entries
-                    
-                    if (videos.length === 0) return; // Keep blank if no videos
-
-                    videos.forEach(video => {
-                        let videoElement = document.createElement('video');
-                        videoElement.src = `/processed_videos/${video}`;
-                        videoElement.controls = true;
-                        videoElement.width = 400;
-                        videoContainer.appendChild(videoElement);
-                    });
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        // Load processed videos on page load
         window.onload = loadProcessedVideos;
     </script>
 </body>
