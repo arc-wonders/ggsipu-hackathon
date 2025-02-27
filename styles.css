@@ -20,37 +20,41 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.83);
+    background: rgba(0, 0, 0, 0.83); /* Strong dark overlay for near black & white effect */
     z-index: -1;
 }
 
 /* Header */
 .header {
-    color: rgba(255, 255, 255, 0.85);
-    padding: 200px 50px 0;
+     /* Yellowish-orange */
+    color: rgb(255, 255, 255,0.85);
+    padding: 250px;
+    padding-top: 200px;
+    padding-bottom: 0px;
     font-size: 55px;
     font-weight: bold;
-    text-align: left;
+    text-align:left;
+     /* Slightly darker shade for depth */
 }
 
-/* About Section */
 .about {
-    color: #cc4b00db;
-    text-align: left;
-    padding: 50px;
+    color:#cc4b00db;
+    text-align:left; 
+    padding-left:250px; 
+    padding-top:150px; 
 }
 
 /* Navbar */
 .navbar {
     background-color: rgba(194, 92, 19, 0.382);
     border-bottom: 3px solid rgba(194, 92, 19, 0.382);
-    display: flex;
+    display:flex;
+    max-width: 800px;
     justify-content: center;
     padding: 10px;
-    margin: 30px auto;
+    margin-top: 30px;
+    margin-left: 350px;
     border-radius: 15px;
-    max-width: 90%;
-    flex-wrap: wrap;
 }
 
 .navbar a {
@@ -67,23 +71,22 @@ body::before {
 
 /* Main Container */
 .container {
-    background: rgba(0, 0, 0, 0.8);
-    padding: 30px;
+    background: rgba(0, 0, 0, 0.8); /* Black transparent */
+    padding: 50px;
     border-radius: 10px;
-    width: 90%;
-    max-width: 600px;
-    margin: 50px auto;
+    width: 50%;
+    margin: 100px auto;
+    text-align: center;
 }
 
 /* Heading Styles */
 h1 {
-    font-size: 32px;
+    font-size: 40px;
     margin-bottom: 20px;
 }
 
 /* Form Elements */
 input, button, select {
-    width: 100%;
     margin: 10px 0;
     padding: 12px;
     border: none;
@@ -107,7 +110,6 @@ button:hover {
 /* Video Styles */
 video {
     width: 100%;
-    max-width: 640px;
     margin-top: 20px;
     border-radius: 5px;
 }
@@ -120,57 +122,4 @@ video {
     text-align: center;
     font-size: 14px;
     margin-top: 50px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .header {
-        font-size: 36px;
-        padding: 100px 20px 0;
-        text-align: center;
-    }
-
-    .about {
-        padding: 20px;
-        text-align: center;
-    }
-
-    .navbar {
-        flex-direction: column;
-        align-items: center;
-        padding: 15px;
-    }
-
-    .navbar a {
-        padding: 10px;
-        font-size: 16px;
-    }
-
-    .container {
-        width: 95%;
-        padding: 20px;
-    }
-
-    h1 {
-        font-size: 28px;
-    }
-
-    video {
-        max-width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .header {
-        font-size: 28px;
-        padding: 80px 15px 0;
-    }
-
-    .navbar a {
-        font-size: 14px;
-    }
-
-    h1 {
-        font-size: 24px;
-    }
 }
