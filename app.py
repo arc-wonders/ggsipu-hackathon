@@ -245,13 +245,25 @@ def process_video_threaded(input_path, output_path):
     thread = Thread(target=worker)
     thread.start()
 
+# -------------------------------
+# Routes
+# -------------------------------
+
 @app.route('/')
-def serve_index():
+def home():
     """
-    Serve 'index.html' at the root URL.
-    Make sure you have a 'static' folder with 'index.html' inside it.
+    Home route.
+    Tries to serve 'index.html' from the static folder.
+    If not found, returns a simple landing message.
     """
-    return send_from_directory('static', 'index.html')
+    if os.path.exists(os.path.join('static', 'index.html')):
+        return send_from_directory('static', 'index.html')
+    else:
+        return (
+            "<h1>Hello, Flask is running!</h1>"
+            "<p>Use the <code>/upload</code> endpoint to upload videos.</p>"
+            "<p>Visit <code>/list_videos</code> to view processed videos.</p>"
+        )
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -305,5 +317,10 @@ def analysis_data_route():
     global analysis_data
     return jsonify(analysis_data)
 
+# -------------------------------
+# Run the App
+# -------------------------------
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Use the PORT environment variable if available (e.g., on Render)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port, debug=True)
