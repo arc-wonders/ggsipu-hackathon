@@ -24,14 +24,14 @@ app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB limit
 
 logging.basicConfig(level=logging.INFO)
 
-# -------------------------------
+# ------------------------------------------------
 # Global YOLO model
-# -------------------------------
+# ------------------------------------------------
 model = YOLO("yolov8n.pt")  # or "yolov8s.pt" for better accuracy
 
-# -------------------------------
+# ------------------------------------------------
 # Global congestion data storage
-# -------------------------------
+# ------------------------------------------------
 analysis_data = []  # Will store data for the *most recently processed video*
 
 def reencode_video(input_path, output_path):
@@ -52,9 +52,9 @@ def reencode_video(input_path, output_path):
     subprocess.run(command, check=True)
     print("Re-encode complete:", output_path)
 
-# -------------------------------
+# ------------------------------------------------
 # Custom SORT Tracker
-# -------------------------------
+# ------------------------------------------------
 class CustomSORT:
     def __init__(self):
         self.tracks = {}
@@ -66,7 +66,7 @@ class CustomSORT:
             x1, y1, x2, y2, conf = det
             found = False
             for track_id, (tx1, ty1, tx2, ty2) in self.tracks.items():
-                iou_val = self.calculate_iou((x1, y1, x2, y2), (tx1, ty1, tx2, ty2))
+                iou_val = self.calculate_iou((x1, y1, x2, y2), (tx1, ty1, tx2, y2))
                 if iou_val > 0.3:
                     updated_tracks[track_id] = (x1, y1, x2, y2)
                     found = True
@@ -92,9 +92,9 @@ class CustomSORT:
         union_area = box1_area + box2_area - inter_area + 1e-6
         return inter_area / union_area
 
-# -------------------------------
+# ------------------------------------------------
 # Speed Estimation Helpers
-# -------------------------------
+# ------------------------------------------------
 object_speeds = {}
 object_speed_history = {}
 
@@ -106,9 +106,9 @@ def smooth_speed(track_id, new_speed, history_length=5):
         object_speed_history[track_id].pop(0)
     return sum(object_speed_history[track_id]) / len(object_speed_history[track_id])
 
-# -------------------------------
+# ------------------------------------------------
 # Main Processing Function
-# -------------------------------
+# ------------------------------------------------
 def process_video(input_path, output_path):
     global analysis_data
     analysis_data = []  # Reset each time we process a new video
@@ -245,26 +245,37 @@ def process_video_threaded(input_path, output_path):
     thread = Thread(target=worker)
     thread.start()
 
-# -------------------------------
-# Routes
-# -------------------------------
-
+# ------------------------------------------------
+# Routes to serve HTML/CSS from current directory
+# ------------------------------------------------
 @app.route('/')
-def home():
+def serve_index():
     """
-    Home route.
-    Tries to serve 'index.html' from the static folder.
-    If not found, returns a simple landing message.
+    Serve 'index.html' at the root URL.
+    Make sure you have an 'index.html' file in the
+    same directory as this script or adjust the path below.
     """
-    if os.path.exists(os.path.join('static', 'index.html')):
-        return send_from_directory('static', 'index.html')
-    else:
-        return (
-            "<h1>Hello, Flask is running!</h1>"
-            "<p>Use the <code>/upload</code> endpoint to upload videos.</p>"
-            "<p>Visit <code>/list_videos</code> to view processed videos.</p>"
-        )
+    return send_from_directory('.', 'index.html')
 
+@app.route('/login')
+def serve_login():
+    return send_from_directory('.', 'login.html')
+
+@app.route('/analytics')
+def serve_analytics():
+    return send_from_directory('.', 'analytics.html')
+
+@app.route('/styles.css')
+def serve_css():
+    return send_from_directory('.', 'styles.css')
+
+@app.route('/background.jpeg')
+def serve_background():
+    return send_from_directory('.', 'background.jpeg')
+
+# ------------------------------------------------
+# Upload/Download Endpoints
+# ------------------------------------------------
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'video' not in request.files:
@@ -317,10 +328,7 @@ def analysis_data_route():
     global analysis_data
     return jsonify(analysis_data)
 
-# -------------------------------
-# Run the App
-# -------------------------------
 if __name__ == '__main__':
-    # Use the PORT environment variable if available (e.g., on Render)
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    # Change the host to 0.0.0.0 to allow external connections.
+    # Adjust port if needed (default 5000).
+    app.run(host='0.0.0.0', port=5000, debug=True)
