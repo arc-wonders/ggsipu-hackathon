@@ -57,6 +57,19 @@ body::before {
     border-radius: 15px;
 }
 
+.navbar a:hover {
+    background: rgba(255, 255, 255, 0.2); /* Light glass effect */
+    color: #fff; /* White text for contrast */
+    border-radius: 15px;
+    backdrop-filter: blur(10px); /* Frosted glass effect */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Depth effect */
+    transition: all 0.3s ease-in-out;
+    transform: scale(1.08); /* Subtle zoom effect */
+}
+
+
+
 .navbar a {
     color: white;
     text-decoration: none;
