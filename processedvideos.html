@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processed Videos - Traffic Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="processedvideos.html">Processed Videos</a>
+        <a href="analytics.html">Analytics</a>
+        <a href="login.html">Login</a>
+    </div>
+    
+    <div class="container">
+        <h1>Processed Videos</h1>
+        <label for="videoSelector">Select a Processed Video:</label>
+        <select id="videoSelector">
+            <option>Loading videos...</option>
+        </select>
+        <br><br>
+
+        <!-- Video element -->
+        <video id="processedVideo" width="640" controls style="display: none;">
+            <source id="videoSource" src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- Play button for user-initiated playback -->
+        <br>
+        <button id="playButton" style="display: none;">Play Video</button>
+    </div>
+
+    <script>
+        function loadProcessedVideos() {
+            fetch('http://127.0.0.1:5000/list_videos')
+                .then(response => response.json())
+                .then(videos => {
+                    const selector = document.getElementById('videoSelector');
+                    const videoElement = document.getElementById('processedVideo');
+                    const sourceElement = document.getElementById('videoSource');
+                    const playButton = document.getElementById('playButton');
+
+                    // Clear previous options
+                    selector.innerHTML = "";
+
+                    if (videos.length === 0) {
+                        selector.innerHTML = "<option>No processed videos available</option>";
+                        videoElement.style.display = "none";
+                        playButton.style.display = "none";
+                        return;
+                    }
+
+                    // Populate the dropdown with video filenames
+                    videos.forEach(video => {
+                        let option = document.createElement('option');
+                        option.value = video;
+                        option.textContent = video;
+                        selector.appendChild(option);
+                    });
+
+                    // Function to update the video source
+                    function updateVideo() {
+                        const selectedVideo = selector.value;
+                        if (selectedVideo) {
+                            sourceElement.src = `http://127.0.0.1:5000/processed_videos/${selectedVideo}`;
+                            videoElement.style.display = "block";
+                            playButton.style.display = "inline-block";
+                            videoElement.load();
+                            // Removed auto-play here
+                        }
+                    }
+
+                    // Load the first video by default
+                    selector.value = videos[0];
+                    updateVideo();
+
+                    // Change event for the dropdown
+                    selector.addEventListener('change', updateVideo);
+
+                    // User-initiated playback
+                    playButton.addEventListener('click', () => {
+                        videoElement.play();
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching processed videos:', error);
+                    document.getElementById('videoSelector').innerHTML = "<option>Failed to load videos</option>";
+                });
+        }
+
+        window.onload = loadProcessedVideos;
+    </script>
+</body>
+</html>
